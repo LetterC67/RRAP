@@ -1,0 +1,1 @@
+g++ -O3 -fopenmp src/*.cpp src/ga_tsp/*.cpp -o ./RRAP
