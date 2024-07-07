@@ -28,3 +28,6 @@ The dataset are located in `dataset` folder. To solve the `pcb3038` instance wit
 ```
 ./RRAP --dataset=./dataset/pcb3038.tsp --salesmen=10 --iterations=2000 --threads=4
 ```
+
+## Acknowledgment
+This implementation incorporates EAX-TSP code sourced from the repository available at: https://github.com/sugia/GA-for-TSP
