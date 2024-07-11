@@ -115,8 +115,8 @@ int main(int argc, char **args){
     Stat stat(variation, graph, salesmen);
 
     for(int i = 0; i < run; i++){
-        cout << endl << "Run " << i + 1 << ' ' << dataset << ' ' << salesmen << endl;
         if(cutoff_time != -1 || i == 0) graph.load_data(dataset);
+        cout << endl << "Run " << i + 1 << ' ' << dataset << ' ' << salesmen << endl;
 
         mTSPSolver solver(graph, salesmen, cutoff_time, cutoff_iteration);
         solver.solve(stat);

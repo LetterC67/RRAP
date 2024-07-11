@@ -277,6 +277,7 @@ void Graph::init_closest(){
 }
 
 void Graph::load_data(const string &file){
+    cout << "Load data from " << file << "..." << endl;
     ifstream ifs(file, ifstream::in);
     string nil;
 
