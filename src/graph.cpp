@@ -276,6 +276,28 @@ void Graph::init_closest(){
     }
 }
 
+void Graph::load_metadata(const string &file){
+    ifstream ifs(file, ifstream::in);
+    string nil;
+
+    ifs >> nil; 
+    if(nil.back() != ':') ifs >> nil;
+
+
+    ifs >> NAME;
+    ifs.ignore();
+
+    getline(ifs, nil);
+    getline(ifs, nil);
+    
+    ifs >> nil; if(nil.back() != ':') ifs >> nil;
+    ifs >> n;
+    ifs >> nil; if(nil.back() != ':') ifs >> nil;
+    ifs >> EDGE_WEIGHT_TYPE;
+
+    ifs >> nil;
+}
+
 void Graph::load_data(const string &file){
     cout << "Load data from " << file << "..." << endl;
     ifstream ifs(file, ifstream::in);

@@ -28,7 +28,7 @@ struct mTSPSolver{
 
     mTSPSolver(Graph &graph, int salesmen, int cutoff_time, int cutoff_iteration);
 
-    void solve(Stat &stat);
+    void solve(Stat &stat, chrono::time_point<chrono::high_resolution_clock> start_time);
     void update_pheromone();
     vector<Ant> build_solutions();
     Ant build_solution(Ant ant);

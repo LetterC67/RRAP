@@ -105,10 +105,7 @@ void mTSPSolver::update_pheromone(){
     }
 }
 
-void mTSPSolver::solve(Stat &stat){
-    auto start_time = chrono::high_resolution_clock::now();
-
-    
+void mTSPSolver::solve(Stat &stat, chrono::time_point<chrono::high_resolution_clock> start_time){
     for(; iteration <= cutoff_iteration; iteration++){
         auto start_iteration = chrono::high_resolution_clock::now();
 

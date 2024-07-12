@@ -112,14 +112,16 @@ int main(int argc, char **args){
     system("mkdir result");
 
     Graph graph;
+    graph.load_metadata(dataset);
     Stat stat(variation, graph, salesmen);
 
     for(int i = 0; i < run; i++){
-        if(cutoff_time != -1 || i == 0) graph.load_data(dataset);
         cout << endl << "Run " << i + 1 << ' ' << dataset << ' ' << salesmen << endl;
-
+        
+        auto start_time = chrono::high_resolution_clock::now();
+        if(cutoff_time != -1 || i == 0) graph.load_data(dataset);
         mTSPSolver solver(graph, salesmen, cutoff_time, cutoff_iteration);
-        solver.solve(stat);
+        solver.solve(stat, start_time);
         stat.write_result(solver.gbest, variation, graph, salesmen, i + 1);
     }
     stat.write_convergence(variation, graph, salesmen);

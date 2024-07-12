@@ -14,7 +14,9 @@ struct Graph{
 
     void init_closest();
     double calculate_distance(int i, int j);
+    void load_metadata(const string &file);
     void load_data(const string &file);
+    
 };
 
 #endif
