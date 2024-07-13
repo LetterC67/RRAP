@@ -1,7 +1,8 @@
 #include "parameters.h"
 
 const int BETA = 5;
-const double RHO = .05;
+const double RHO_BASE = .02;
+const double RHO_COEFF = 1. / 1500.;
 const int DEPOT = 0;
 const int NUM_THREADS = 1;
 const double RATIO = 80;

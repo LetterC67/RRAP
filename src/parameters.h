@@ -2,7 +2,8 @@
 #define PARAMETERS_H
 
 extern const int BETA;
-extern const double RHO;
+extern const double RHO_BASE;
+extern const double RHO_COEFF;
 extern const int DEPOT;
 extern const int NUM_THREADS;
 extern const double RATIO;
