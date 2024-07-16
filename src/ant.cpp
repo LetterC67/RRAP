@@ -68,7 +68,7 @@ int count_similar(unordered_set<int> &edges, vector<int> &tour, int n){
 
 void Ant::run_tsp(){
     for(auto &tour : tours){
-        if(tour.size() <= 80) continue;
+        if(tour.size() <= 100) continue;
 
         vector<vector<double>> _distance(tour.size() - 1, vector<double>(tour.size() - 1));
 

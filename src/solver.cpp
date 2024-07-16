@@ -114,12 +114,12 @@ void mTSPSolver::solve(Stat &stat, chrono::time_point<chrono::high_resolution_cl
         auto ants = build_solutions();
 
         for(auto &ant : ants){
-            population.add(ant);
             if(ant < gbest){
                 if(iteration > RUN_TSP_THRESHOLD) ant.run_tsp();
                 gbest = ant;
                 no_improve = 0;
             }
+            population.add(ant);
 
             if(ant < ibest){
                 ibest = ant;
