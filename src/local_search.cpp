@@ -348,13 +348,20 @@ bool Ant::or_opt(_tour &tour, int idx){
     return true;
 }
 
-bool Ant::intra_tour_optimization(){
+bool Ant::intra_tour_optimization(vector<bool> &not_improved){
     int idx = 0;
     bool improved = false;
 
     for(auto &tour : tours){
+        if(not_improved[idx]){
+            idx++;
+            continue;
+        }
         if(two_opt_sweepline(tour, idx)) improved = true;
         if(or_opt(tour, idx)) improved = true;
+        if(!improved){
+            not_improved[idx] = true;
+        }
         idx++;
     }
 
@@ -366,9 +373,15 @@ bool Ant::intra_tour_optimization(){
 
 void Ant::local_search(){
     vector<int> ord;
+    vector<bool> single_not_improved(tours.size());
+    vector<vector<int>> not_improved;
     
-    for(int i = 0; i < tours.size(); i++)
+    for(int i = 0; i < tours.size(); i++){
         ord.push_back(i);
+        not_improved.push_back(vector<int>(tours.size()));
+    }
+
+    vector<int> _del(del.begin(), del.end());
 
     for(int neighborhood = 0; neighborhood < 3; neighborhood++){
         bool improved = false;
@@ -377,16 +390,35 @@ void Ant::local_search(){
         if(neighborhood == 0){
             for(int i = 0; i < tours.size(); i++)
                 for(int j = 0; j < tours.size(); j++)
-                    if(j != i)
-                        improved |= relocate(tours[ord[i]], tours[ord[j]], ord[i], ord[j]);
+                    if(j != i && not_improved[i][j] < 1)
+                        if(relocate(tours[ord[i]], tours[ord[j]], ord[i], ord[j])){
+                            improved = true;             
+                            fill(not_improved[i].begin(), not_improved[i].end(), 0);
+                            fill(not_improved[j].begin(), not_improved[j].end(), 0);
+                            single_not_improved[i] = single_not_improved[j] = false;
+                        }else{
+                            not_improved[i][j] = not_improved[j][i] = 1;
+                        }
             
         }else if(neighborhood == 1){
             for(int i = 0; i < tours.size(); i++)
                 for(int j = 0; j < tours.size(); j++)
-                    if(j != i)
-                        improved |= two_opt_inter_tour(tours[ord[i]], tours[ord[j]], ord[i], ord[j]);
+                    if(j != i && not_improved[i][j] < 2)
+                        if(two_opt_inter_tour(tours[ord[i]], tours[ord[j]], ord[i], ord[j])){
+                            improved = true;
+                            fill(not_improved[i].begin(), not_improved[i].end(), 0);
+                            fill(not_improved[j].begin(), not_improved[j].end(), 0);
+                            single_not_improved[i] = single_not_improved[j] = false;
+                        }else{
+                            not_improved[i][j] = not_improved[j][i] = 2;
+                        }
         }else{
-            improved |= intra_tour_optimization();
+            improved |= intra_tour_optimization(single_not_improved);
+            for(int i = 0; i < single_not_improved.size(); i++){
+                if(!single_not_improved[i]){ 
+                    fill(not_improved[i].begin(), not_improved[i].end(), 0);
+                }
+            }
         }
 
         if(improved) neighborhood = -1;

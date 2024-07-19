@@ -81,7 +81,7 @@ struct Ant{
     void run_tsp();
     void verify(int n);
 
-    bool intra_tour_optimization();
+    bool intra_tour_optimization(vector<bool> &_improved);
 
     void local_search();
     void end_tour();
