@@ -183,7 +183,7 @@ struct OneMinimumSpanningTree {
     }
 
     double new_dis(int i, int j){
-        if (i == j) return 0;
+        if (i == j || j == -1) return 0;
         return dis[i][j] + bestW[i] + bestW[j];
     }
     vector<vector<int>> computeCandidateSet() {
@@ -227,11 +227,13 @@ struct OneMinimumSpanningTree {
             ///// BUILD THE 1-TREE //////////////////////////
             b[node] = -INT_MAX;
             for (int k = node; k != 1; k = bestPar[k]) {
+                if(k == -1) break;
                 b[bestPar[k]] = max(b[k], new_dis(k, bestPar[k]));
                 marked[k] = node;
             }
 
             for (auto &v : bestTopo) {
+                if(bestPar[v] == -1) continue;
                 if (v != node) {
                     if (marked[v] != node) {
                         b[v] = max(b[bestPar[v]], new_dis(v, bestPar[v]));

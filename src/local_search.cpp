@@ -2,8 +2,18 @@
 #include "ant.h"
 #include "parameters.h"
 #include "utils.h"
+#include "local_search.h"
 using namespace std;
 
+LocalSearchMove::LocalSearchMove(){
+    cost = REQUIRE_RECALCULATION;
+}
+
+LocalSearchMove::LocalSearchMove(double cost, int i, int j, int type): cost(cost), i(i), j(j), type(type){}
+
+bool LocalSearchMove::operator<(const LocalSearchMove& other) const {
+    return this->cost < other.cost;
+}
 
 template<typename T>
 void move_segment(vector<T>& vec, int l, int r, int i, bool type = false) {
@@ -30,8 +40,8 @@ void move_segment(vector<T>& vec, int l, int r, int i, bool type = false) {
     vec.insert(vec.begin() + i + 1, segment.begin(), segment.end());
 }
 
-bool Ant::relocate(_tour &a, _tour &b, int idx_a, int idx_b){
-    if(a.cost < b.cost ) return false;
+LocalSearchMove Ant::relocate(_tour &a, _tour &b, int idx_a, int idx_b){
+    if(a.cost < b.cost ) return LocalSearchMove{NO_MOVE, 0, 0, 0};
 
     bool relocated = false;
     double min_cost = 1e9;
@@ -39,6 +49,8 @@ bool Ant::relocate(_tour &a, _tour &b, int idx_a, int idx_b){
 
     for(int i = 1; i < a.size() - 1; i++){
         double delta_decrease_a = -(*distance)[a[i - 1]][a[i]] - (*distance)[a[i]][a[i + 1]] + (*distance)[a[i - 1]][a[i + 1]];
+        double delta_decrease_a_2 = 0;
+        if(i < a.size() - 2)
         double delta_decrease_a_2 = -(*distance)[a[i - 1]][a[i]] - (*distance)[a[i]][a[i + 1]] - (*distance)[a[i + 1]][a[i + 2]]  + (*distance)[a[i - 1]][a[i + 2]];
         for(int &u : (*graph).closest[a[i]]){
             if(assigned[u] != idx_b) continue;
@@ -76,9 +88,19 @@ bool Ant::relocate(_tour &a, _tour &b, int idx_a, int idx_b){
         }
     }
 
-    if(_i == -1) return false;
-
+    double delta_decrese_a, delta_increase_b;
     int i = _i, j = _j;
+
+    if(_i == -1){
+        return LocalSearchMove{NO_MOVE, 0, 0, 0};
+    }
+
+    return LocalSearchMove{min_cost, i, j, type};
+}
+
+void Ant::execute_relocate(int i, int j, int type, int idx_a, int idx_b){
+    _tour &a = tours[idx_a];
+    _tour &b = tours[idx_b];
 
     if(type == 0){
         double delta_decrease_a = -(*distance)[a[i - 1]][a[i]] - (*distance)[a[i]][a[i + 1]] + (*distance)[a[i - 1]][a[i + 1]];
@@ -113,16 +135,15 @@ bool Ant::relocate(_tour &a, _tour &b, int idx_a, int idx_b){
         a.tour.erase(a.begin() + i);
     }
 
-    // assert(abs(a.cost - tour_length(a)) < 1e-3);
-    // assert(abs(b.cost - tour_length(b)) < 1e-3);
+    assert(abs(a.cost - tour_length(a)) < 1e-3);
+    assert(abs(b.cost - tour_length(b)) < 1e-3);
 
     retag(idx_a);
     retag(idx_b);
 
-    return true;
 }
 
-bool Ant::two_opt_inter_tour(_tour &a, _tour &b, int idx_a, int idx_b){
+LocalSearchMove Ant::two_opt_inter_tour(_tour &a, _tour &b, int idx_a, int idx_b){
     vector<double> pref_a(a.size()), suf_a(a.size()), pref_b(b.size()), suf_b(b.size());
 
     for(int i = 1; i < a.size(); i++){
@@ -175,13 +196,32 @@ bool Ant::two_opt_inter_tour(_tour &a, _tour &b, int idx_a, int idx_b){
         }
     }
 
-    if(type == -1) return false;
+    if(type == -1) return LocalSearchMove(NO_MOVE, 0, 0, 0);
+    return {max(_new_cost_a, _new_cost_b), _i, _j, type};
+}
 
-    int &i = _i, &j = _j;
+void Ant::execute_two_opt_inter_tour(int i, int j, int type, int idx_a, int idx_b){
+    _tour &a = tours[idx_a];
+    _tour &b = tours[idx_b];
 
-    if(type == 0){
-        a.cost = _new_cost_a;
-        b.cost = _new_cost_b;
+    vector<double> pref_a(a.size()), suf_a(a.size()), pref_b(b.size()), suf_b(b.size());
+
+    for(int i = 1; i < a.size(); i++){
+        pref_a[i] = pref_a[i - 1] + (*distance)[a[i - 1]][a[i]];
+    }
+    for(int i = 1; i < b.size(); i++){
+        pref_b[i] = pref_b[i - 1] + (*distance)[b[i - 1]][b[i]];
+    }
+    for(int i = a.size() - 2; i >= 0; i--){
+        suf_a[i] = suf_a[i + 1] + (*distance)[a[i + 1]][a[i]];   
+    }
+    for(int i = b.size() - 2; i >= 0; i--){
+        suf_b[i] = suf_b[i + 1] + (*distance)[b[i + 1]][b[i]];   
+    }
+
+     if(type == 0){
+        a.cost = pref_a[i - 1] + suf_b[j] + (*distance)[a[i - 1]][b[j]];
+        b.cost = pref_b[j - 1] + suf_a[i] + (*distance)[b[j - 1]][a[i]];
 
         vector<int> c = vector<int>(a.tour.begin() + i, a.tour.end()), d = vector<int>(b.tour.begin() + j, b.tour.end());
 
@@ -191,8 +231,8 @@ bool Ant::two_opt_inter_tour(_tour &a, _tour &b, int idx_a, int idx_b){
         a.tour.insert(a.end(), d.begin(), d.end());
         b.tour.insert(b.end(), c.begin(), c.end());
     }else{
-        a.cost = _new_cost_a;
-        b.cost = _new_cost_b;
+        a.cost = pref_a[i - 1] + pref_b[j - 1] + (*distance)[a[i - 1]][b[j - 1]];;
+        b.cost = suf_a[i] + suf_b[j] + (*distance)[a[i]][b[j]];
 
         vector<int> c = vector<int>(a.tour.begin() + i, a.tour.end()),
                     d = vector<int>(b.tour.begin() + j, b.tour.end());
@@ -207,13 +247,11 @@ bool Ant::two_opt_inter_tour(_tour &a, _tour &b, int idx_a, int idx_b){
         b.tour.insert(b.end(), d.begin(), d.end());
     }
 
-    // assert(abs(a.cost - tour_length(a)) < 1e-3);
-    // assert(abs(b.cost - tour_length(b)) < 1e-3);
+    assert(abs(tour_length(a) - a.cost) < 1e-4);
+    assert(abs(tour_length(b) - b.cost) < 1e-4);
 
     retag(idx_a);
     retag(idx_b);
-
-    return true;
 }
 
 struct Point{
@@ -373,56 +411,122 @@ bool Ant::intra_tour_optimization(vector<bool> &not_improved){
 
 void Ant::local_search(){
     vector<int> ord;
+    LocalSearchResult local_search_result (2, vector<vector<LocalSearchMove>>(tours.size()));
     vector<bool> single_not_improved(tours.size());
-    vector<vector<int>> not_improved;
     
     for(int i = 0; i < tours.size(); i++){
         ord.push_back(i);
-        not_improved.push_back(vector<int>(tours.size()));
+        local_search_result[0][i] = vector<LocalSearchMove>(tours.size());
+        local_search_result[1][i] = vector<LocalSearchMove>(tours.size());
     }
 
     vector<int> _del(del.begin(), del.end());
 
+    int cnt = 0;
     for(int neighborhood = 0; neighborhood < 3; neighborhood++){
+        ++cnt;
+      //  cout << neighborhood << ' ' << local_search_result[0].size() << endl;
         bool improved = false;
         shuffle(ord.begin(), ord.end(), rng);
         
         if(neighborhood == 0){
             for(int i = 0; i < tours.size(); i++)
                 for(int j = 0; j < tours.size(); j++)
-                    if(j != i && not_improved[i][j] < 1)
-                        if(relocate(tours[ord[i]], tours[ord[j]], ord[i], ord[j])){
-                            improved = true;             
-                            fill(not_improved[i].begin(), not_improved[i].end(), 0);
-                            fill(not_improved[j].begin(), not_improved[j].end(), 0);
-                            single_not_improved[i] = single_not_improved[j] = false;
-                        }else{
-                            not_improved[i][j] = not_improved[j][i] = 1;
-                        }
-            
+                    if(j != i && local_search_result[0][i][j].cost == REQUIRE_RECALCULATION)
+                        local_search_result[0][i][j] = relocate(tours[i], tours[j], i, j);
+
+            int _i = -1, _j = -1, _type = -1, idx_a, idx_b;
+            double min_cost = NO_MOVE;
+
+            for(int i = 0; i < tours.size(); i++){
+                for(int j = 0; j < tours.size(); j++){
+                    if(i != j && local_search_result[0][i][j].cost < min_cost){
+                        min_cost = local_search_result[0][i][j].cost;
+                        _i = local_search_result[0][i][j].i;
+                        _j = local_search_result[0][i][j].j;
+                        _type = local_search_result[0][i][j].type;
+                        idx_a = i;
+                        idx_b = j;
+                    }
+                }
+            }
+
+            if(min_cost < NO_MOVE){
+                execute_relocate(_i, _j, _type, idx_a, idx_b);
+                improved = true;
+                for(int k = 0; k < tours.size(); k++){
+                    local_search_result[0][idx_a][k].cost = REQUIRE_RECALCULATION;
+                    local_search_result[0][k][idx_a].cost = REQUIRE_RECALCULATION;
+                    local_search_result[1][k][idx_a].cost = REQUIRE_RECALCULATION;
+                    local_search_result[1][idx_a][k].cost = REQUIRE_RECALCULATION;
+                    local_search_result[0][idx_b][k].cost = REQUIRE_RECALCULATION;
+                    local_search_result[0][k][idx_b].cost = REQUIRE_RECALCULATION;
+                    local_search_result[1][k][idx_b].cost = REQUIRE_RECALCULATION;
+                    local_search_result[1][idx_b][k].cost = REQUIRE_RECALCULATION;
+                }    
+                single_not_improved[idx_a] = single_not_improved[idx_b] = false;
+            }else{
+                improved = false;
+            }
+
+         //   cout << fixed << setprecision(12) << min_cost << endl;
         }else if(neighborhood == 1){
             for(int i = 0; i < tours.size(); i++)
-                for(int j = 0; j < tours.size(); j++)
-                    if(j != i && not_improved[i][j] < 2)
-                        if(two_opt_inter_tour(tours[ord[i]], tours[ord[j]], ord[i], ord[j])){
-                            improved = true;
-                            fill(not_improved[i].begin(), not_improved[i].end(), 0);
-                            fill(not_improved[j].begin(), not_improved[j].end(), 0);
-                            single_not_improved[i] = single_not_improved[j] = false;
-                        }else{
-                            not_improved[i][j] = not_improved[j][i] = 2;
-                        }
+                for(int j = i + 1; j < tours.size(); j++)
+                    if(j != i && local_search_result[1][i][j].cost == REQUIRE_RECALCULATION)
+                        local_search_result[1][i][j] = two_opt_inter_tour(tours[i], tours[j], i, j);
+
+            int _i = -1, _j = -1, _type = -1, idx_a, idx_b;
+            double min_cost = NO_MOVE;
+
+            for(int i = 0; i < tours.size(); i++){
+                for(int j = i + 1; j < tours.size(); j++){
+                    if(i != j && local_search_result[0][i][j].cost < min_cost){
+                        min_cost = local_search_result[0][i][j].cost;
+                        _i = local_search_result[0][i][j].i;
+                        _j = local_search_result[0][i][j].j;
+                        _type = local_search_result[0][i][j].type;
+                        idx_a = i;
+                        idx_b = j;
+                    }
+                }
+            }
+
+            if(min_cost < NO_MOVE){
+                execute_two_opt_inter_tour(_i, _j, _type, idx_a, idx_b);
+                improved = true;
+                for(int k = 0; k < tours.size(); k++){
+                    local_search_result[0][idx_a][k].cost = REQUIRE_RECALCULATION;
+                    local_search_result[0][k][idx_a].cost = REQUIRE_RECALCULATION;
+                    local_search_result[1][k][idx_a].cost = REQUIRE_RECALCULATION;
+                    local_search_result[1][idx_a][k].cost = REQUIRE_RECALCULATION;
+                    local_search_result[0][idx_b][k].cost = REQUIRE_RECALCULATION;
+                    local_search_result[0][k][idx_b].cost = REQUIRE_RECALCULATION;
+                    local_search_result[1][k][idx_b].cost = REQUIRE_RECALCULATION;
+                    local_search_result[1][idx_b][k].cost = REQUIRE_RECALCULATION;
+                }    
+                single_not_improved[idx_a] = single_not_improved[idx_b] = false;
+            }else{
+                improved = false;
+            }
         }else{
             improved |= intra_tour_optimization(single_not_improved);
             for(int i = 0; i < single_not_improved.size(); i++){
                 if(!single_not_improved[i]){ 
-                    fill(not_improved[i].begin(), not_improved[i].end(), 0);
+                    for(int k = 0; k < tours.size(); k++){
+                        local_search_result[0][i][k].cost = REQUIRE_RECALCULATION;
+                        local_search_result[0][k][i].cost = REQUIRE_RECALCULATION;
+                        local_search_result[1][k][i].cost = REQUIRE_RECALCULATION;
+                        local_search_result[1][i][k].cost = REQUIRE_RECALCULATION;
+                    }  
                 }
             }
         }
 
         if(improved) neighborhood = -1;
     }
+
+  //  cout << cnt << endl;
 
         
     for(auto &tour : tours){

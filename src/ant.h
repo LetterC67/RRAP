@@ -3,8 +3,10 @@
 
 #include <bits/stdc++.h>
 #include "parameters.h"
+#include "local_search.h"
 #include "graph.h"
 using namespace std;
+typedef  vector<vector<vector<LocalSearchMove>>> LocalSearchResult;
 
 struct _tour{
     vector<int> tour;
@@ -73,10 +75,11 @@ struct Ant{
     void add(int salesman, int vertex);
     void add(_tour &tour, int vertex);
     
-    bool relocate(_tour &a, _tour &b, int idx_a, int idx_b);
-
+    LocalSearchMove relocate(_tour &a, _tour &b, int idx_a, int idx_b);
+    void execute_relocate(int i, int j, int type, int idx_a, int idx_b);
+    void execute_two_opt_inter_tour(int i, int j, int type, int idx_a, int idx_b);
     bool two_opt_sweepline(_tour &tour, int idx);
-    bool two_opt_inter_tour(_tour &a, _tour &b, int idx_a, int idx_b);
+    LocalSearchMove two_opt_inter_tour(_tour &a, _tour &b, int idx_a, int idx_b);
     bool or_opt(_tour &tour, int idx);
     void run_tsp();
     void verify(int n);

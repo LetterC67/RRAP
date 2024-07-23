@@ -97,7 +97,7 @@ void Ant::run_tsp(){
 
             unordered_set<int> edges;
 
-            for(int i = 0; i < tour.size(); i++){
+            for(int i = 0; i < tour.size() - 1; i++){
                 edges.insert(tour[i] * (*distance).size() + tour[i + 1]);
             }
 

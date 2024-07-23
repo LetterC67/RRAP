@@ -1,1 +1,1 @@
-g++ -O3 -fopenmp src/*.cpp src/ga_tsp/*.cpp -o ./RRAP
+g++ -O3 -fopenmp  -g -fvar-tracking src/*.cpp src/ga_tsp/*.cpp -o ./RRAP
