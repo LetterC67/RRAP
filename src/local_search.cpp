@@ -390,27 +390,27 @@ void Ant::local_search(){
         if(neighborhood == 0){
             for(int i = 0; i < tours.size(); i++)
                 for(int j = 0; j < tours.size(); j++)
-                    if(j != i && not_improved[i][j] < 1)
+                    if(j != i && not_improved[ord[i]][ord[j]] < 1)
                         if(relocate(tours[ord[i]], tours[ord[j]], ord[i], ord[j])){
                             improved = true;             
-                            fill(not_improved[i].begin(), not_improved[i].end(), 0);
-                            fill(not_improved[j].begin(), not_improved[j].end(), 0);
-                            single_not_improved[i] = single_not_improved[j] = false;
+                            fill(not_improved[ord[i]].begin(), not_improved[ord[i]].end(), 0);
+                            fill(not_improved[ord[j]].begin(), not_improved[ord[j]].end(), 0);
+                            single_not_improved[ord[i]] = single_not_improved[ord[j]] = false;
                         }else{
-                            not_improved[i][j] = not_improved[j][i] = 1;
+                            not_improved[ord[i]][ord[j]] = 1;
                         }
             
         }else if(neighborhood == 1){
             for(int i = 0; i < tours.size(); i++)
                 for(int j = 0; j < tours.size(); j++)
-                    if(j != i && not_improved[i][j] < 2)
+                    if(j != i && not_improved[ord[i]][ord[j]] < 2)
                         if(two_opt_inter_tour(tours[ord[i]], tours[ord[j]], ord[i], ord[j])){
                             improved = true;
-                            fill(not_improved[i].begin(), not_improved[i].end(), 0);
-                            fill(not_improved[j].begin(), not_improved[j].end(), 0);
-                            single_not_improved[i] = single_not_improved[j] = false;
+                            fill(not_improved[ord[i]].begin(), not_improved[ord[i]].end(), 0);
+                            fill(not_improved[ord[j]].begin(), not_improved[ord[j]].end(), 0);
+                            single_not_improved[ord[i]] = single_not_improved[ord[j]] = false;
                         }else{
-                            not_improved[i][j] = not_improved[j][i] = 2;
+                            not_improved[ord[i]][ord[j]] = not_improved[ord[j]][ord[i]] = 2;
                         }
         }else{
             improved |= intra_tour_optimization(single_not_improved);
