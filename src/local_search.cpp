@@ -244,7 +244,7 @@ struct sweepline_event{
 bool Ant::two_opt_sweepline(_tour &tour, int idx){
     vector<Segment> segment;
 
-    for(int i = 0; i < tour.size() - 2; i++){
+    for(int i = 0; i < tour.size() - 1; i++){
         segment.push_back(Segment(tour[i], tour[i + 1], graph));
     }
 
@@ -271,10 +271,18 @@ bool Ant::two_opt_sweepline(_tour &tour, int idx){
         if(e.type){
             int a = position[segment[e.index].u], b = position[segment[e.index].v];
             if(a > b) swap(a, b);
+            if(a + 1 != b){
+                swap(a, b);
+                b = a + 1;
+            }
             
             for(auto &i : current){
                 int c = position[segment[i].u], d = position[segment[i].v];
                 if(c > d) swap(c, d);
+                if(c + 1 != d){
+                    swap(c, d);
+                    d = c + 1;
+                }
                 
                 int _a = a, _b = b;
                 if(_a > c) swap(_a, c), swap(_b, d);
