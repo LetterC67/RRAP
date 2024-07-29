@@ -316,7 +316,7 @@ bool Ant::two_opt_sweepline(_tour &tour, int idx){
                 if(_a > c) swap(_a, c), swap(_b, d);
                 
                 double delta = get_delta(_a, _b, c, d, tour, distance);
-                if(delta < -1e-4){
+                if(delta < -1e-4 && _a != c){
                     if(delta < min_cost){
                         min_cost = delta;
                         l = _b, r = c;
@@ -350,7 +350,6 @@ bool Ant::two_opt_sweepline(_tour &tour, int idx){
     if(l == -1) return false;
 
     double delta = get_delta(l - 1, l, r, r + 1, tour, distance);
-  //  cout << delta << ' ' << l << ' ' << r << endl;
     reverse(tour.begin() + l, tour.begin() + r + 1);
     tour.cost += delta;
     retag(idx);
