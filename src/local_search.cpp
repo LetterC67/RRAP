@@ -241,6 +241,34 @@ struct sweepline_event{
     bool type;
 };
 
+//  bool Ant::two_opt_sweepline(_tour &tour, int idx){
+
+//     double min_cost = 1e9;
+//     int l = -1, r = -1;
+
+//         for(int i = 1; i < tour.size() - 2; i++){
+//             for(int j = i + 1; j < tour.size() - 1; j++){
+//                     double delta = get_delta(i - 1, i, j , j + 1, tour, distance);
+//                     if(delta < -1e-4){
+//                         if(delta < min_cost){
+//                             min_cost = delta;
+//                             l = i, r = j;
+//                         }
+//                     }
+//             }
+//     }
+//     if(l == -1) return false;
+
+//     double delta = get_delta(l - 1, l, r, r + 1, tour, distance);
+//     reverse(tour.begin() + l, tour.begin() + r + 1);
+//     tour.cost += delta;
+//     retag(idx);
+
+//     // assert(abs(tour.cost - tour_length(tour)) < 1e-3);
+
+//     return true;
+// }
+
 bool Ant::two_opt_sweepline(_tour &tour, int idx){
     vector<Segment> segment;
 
@@ -301,9 +329,28 @@ bool Ant::two_opt_sweepline(_tour &tour, int idx){
         }
     }
 
+    for(int i = 0; i < tour.size() - 1; i++){
+        for(auto &u : (*graph).closest[tour[i]]){
+            if(assigned[u] != idx) continue;
+            int j = position[u];
+            if(u == DEPOT ) continue;
+            int _l, _r;
+            if(i < j) _l = i + 1, _r = j;
+            else _l = j, _r = i - 1;
+            double delta = get_delta(_l - 1, _l, _r, _r + 1, tour, distance);
+            if(delta < -1e-4){
+                if(delta < min_cost){
+                    min_cost = delta;
+                    l = _l, r = _r; 
+                }
+            }
+        }
+    }
+
     if(l == -1) return false;
 
     double delta = get_delta(l - 1, l, r, r + 1, tour, distance);
+  //  cout << delta << ' ' << l << ' ' << r << endl;
     reverse(tour.begin() + l, tour.begin() + r + 1);
     tour.cost += delta;
     retag(idx);
