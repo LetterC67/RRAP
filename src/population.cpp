@@ -40,7 +40,7 @@ void Population::kill(){
 
         sort(v.begin(), v.end(), greater<double>());
 
-        fitness[i] = population[i].min_max_cost * powl(DELTA, (v[0] + v[1]) / 2.);
+        fitness[i] = population[i].min_max_cost * powl(PARAMETER.DELTA, (v[0] + v[1]) / 2.);
     }
 
     sort(index.begin(), index.end(), [&](const int &a, const int &b){
@@ -49,7 +49,7 @@ void Population::kill(){
 
     vector<Ant> temp;
 
-    for(int i = 0; i < min((int)population.size(), MU); i++){
+    for(int i = 0; i < min((int)population.size(), PARAMETER.MU); i++){
         temp.push_back(population[index[i]]);
     }
 

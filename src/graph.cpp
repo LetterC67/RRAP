@@ -272,7 +272,7 @@ void Graph::init_closest(){
     closest = _closest;
 
     for(auto &c : closest){
-        while(c.size() > ALPHA) c.pop_back();
+        while(c.size() > PARAMETER.ALPHA) c.pop_back();
     }
 }
 
