@@ -12,7 +12,7 @@ using namespace std;
 
 mTSPSolver::mTSPSolver(Graph &graph, int salesmen, int cutoff_time, int cutoff_iteration): graph(graph), salesmen(salesmen), cutoff_iteration(cutoff_iteration), cutoff_time(cutoff_time){
     n = graph.n;
-    TAU_MIN = 1 / (double(n * n) / RATIO);
+    TAU_MIN = 1 / (double(n * n) / PARAMETER.SMMAS_PARAMETER.RATIO);
     TAU_MAX = 1.;
     pheromone.resize(n);
     for(auto &p : pheromone)

@@ -59,6 +59,7 @@ Parameter parse_parameter_options(int argc, char* argv[]) {
 	parser.add("rho-base", "The evaporation base rate of the pheromone", parameter.SMMAS_PARAMETER.RHO_BASE);
 	parser.add("rho-coef", "The addition of the evaporation coefficient rate of the pheromone", parameter.SMMAS_PARAMETER.RHO_COEFF);
 	parser.add("a,ants", "The number of ants", parameter.SMMAS_PARAMETER.LAMBDA);
+	parser.add("ratio", "The addition ratio on tau_min", parameter.SMMAS_PARAMETER.RATIO);
 
 	parser.add("p,population", "The size of the population", parameter.MU);
 	parser.add("d,delta", "The diversity penalty on individuals", parameter.DELTA);
@@ -83,5 +84,4 @@ Parameter parse_parameter_options(int argc, char* argv[]) {
 }
 
 const int DEPOT = 0;
-const double RATIO = 80; // Use for tau min
 const int OPT_SIZE = 4; // Use for or-opt

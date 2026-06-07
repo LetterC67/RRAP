@@ -16,6 +16,8 @@ struct Parameter {
 
 		// The number of ants
 		int LAMBDA = 15;
+
+		double RATIO = 80; // Use for tau min
 	};
 
 	SMMASParameter SMMAS_PARAMETER;
@@ -66,6 +68,7 @@ void transform(const Parameter& parameter, MapT& map) {
 	map["beta"] = parameter.SMMAS_PARAMETER.BETA;
 	map["rho base"] = parameter.SMMAS_PARAMETER.RHO_BASE;
 	map["rho coef"] = parameter.SMMAS_PARAMETER.RHO_COEFF;
+	map["ratio"] = parameter.SMMAS_PARAMETER.RATIO;
 	map["population"] = parameter.MU;
 	map["delta"] = parameter.DELTA;
 	map["maximum Ruin and Recreate rate"] = parameter.MAXIMUM_RUIN_AND_RECREATE_RATE;
@@ -86,7 +89,6 @@ void transform(const Parameter& parameter, MapT& map) {
 Parameter parse_parameter_options(int argc, char* argv[]);
 
 extern const int DEPOT;
-extern const double RATIO;
 extern const int OPT_SIZE;
 
 #endif
