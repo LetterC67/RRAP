@@ -2,6 +2,7 @@
 #include "ant.h"
 #include "utils.h"
 #include "ga_tsp/run_tsp.h"
+#include "parameters.h"
 
 using namespace std;
 
@@ -124,7 +125,7 @@ void Ant::run_tsp(){
 Ant trim(Ant ant){
     int salesmen = ant.tours.size();
             
-    int del_count = rng() % ((salesmen + 1) / 2) + 1;
+    int del_count = rng() % (int) (PARAMETER.MAXIMUM_RUIN_AND_RECREATE_RATE * (salesmen + 1)) + 1;
     unordered_set<int> del_list;
 
     vector<int> v;

@@ -1,12 +1,16 @@
 #include <bits/stdc++.h>
 #include "utils.h"
 #include "ant.h"
+#include "parameters.h"
 
 using namespace std;
 
-mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+mt19937 rng;
 uniform_real_distribution<double> rng_real(0.0, 1.0);
 
+void init_random_number_generators(uint32_t seed) {
+    rng = std::mt19937(seed);
+}
 
 double _qpow(double x, int y){
     double res = 1;

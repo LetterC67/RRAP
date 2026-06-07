@@ -1,22 +1,30 @@
 #include <bits/stdc++.h>
 #include "stat.h"
 #include "graph.h"
+#include "parameters.h"
 using namespace std;
 
-Stat::Stat(string &variation, Graph &graph, int salesmen){
-    std::ofstream outputFile("result/" + graph.NAME + "_" + to_string(salesmen) + "_" + variation, std::ios::out);
+Stat::Stat(string &variation, Graph &graph){
+    std::ofstream outputFile("result/" + graph.NAME + "_" + to_string(PARAMETER.SALESMEN) 
+                                                    + "_" + to_string(PARAMETER.SEED) 
+                                                    + "_" + to_string(PARAMETER.NUM_RUNS) 
+                                                    + "_" + variation, std::ios::out);
     best = 1e18;
     cnt = worst = avg = 0;
 }
 
 
-void Stat::write_result(Ant &gbest, string &variation, Graph &graph, int salesmen, int run){
+void Stat::write_result(Ant &gbest, string &variation, Graph &graph, int run){
     cnt++;
     worst = max(worst, gbest.min_max_cost);
     best = min(best, gbest.min_max_cost);
     avg += gbest.min_max_cost;
 
-    std::ofstream outputFile("result/" + graph.NAME + "_" + to_string(salesmen) + "_" + variation, std::ios::app);
+
+    std::ofstream outputFile("result/" + graph.NAME + "_" + to_string(PARAMETER.SALESMEN) 
+                                                    + "_" + to_string(PARAMETER.SEED) 
+                                                    + "_" + to_string(PARAMETER.NUM_RUNS) 
+                                                    + "_" + variation, std::ios::app);
     
     outputFile <<"Run " << run << ' ' << gbest.min_max_cost << endl;
     for(auto &tour : gbest.tours){
@@ -41,8 +49,11 @@ void Stat::add(int iter, double cost){
     ccnt[iter]++;
 }
 
-void Stat::write_convergence(string &variation, Graph &graph, int salesmen){
-    std::ofstream outputFile("convergence/" + graph.NAME + "_" + to_string(salesmen) + "_" + variation, std::ios::out);
+void Stat::write_convergence(string &variation, Graph &graph){
+    std::ofstream outputFile("convergence/" + graph.NAME + "_" + to_string(PARAMETER.SALESMEN) 
+                                                         + "_" + to_string(PARAMETER.SEED) 
+                                                         + "_" + to_string(PARAMETER.NUM_RUNS) 
+                                                         + "_" + variation, std::ios::out);
 
     for(int i = 0; i < convergence.size(); i++){
         outputFile << i + 1 << ' ' << convergence[i] / double(ccnt[i]) << endl;
@@ -51,9 +62,12 @@ void Stat::write_convergence(string &variation, Graph &graph, int salesmen){
     outputFile.close();
 }
 
-void Stat::write_result_complete(string &variation, Graph &graph, int salesmen){
-    std::ofstream outputFile("result/" + graph.NAME + "_" + to_string(salesmen) + "_" + variation, std::ios::app);
-    std::ofstream tuningFile("tuning/" + graph.NAME + "_" + to_string(salesmen), std::ios::app);
+void Stat::write_result_complete(string &variation, Graph &graph){
+    std::ofstream outputFile("result/" + graph.NAME + "_" + to_string(PARAMETER.SALESMEN) 
+                                                         + "_" + to_string(PARAMETER.SEED) 
+                                                         + "_" + to_string(PARAMETER.NUM_RUNS) 
+                                                         + "_" + variation, std::ios::app);
+    // std::ofstream tuningFile("tuning/" + graph.NAME + "_" + to_string(salesmen), std::ios::app);
     
     outputFile <<"Avg: " << avg / double(cnt) << endl;
     outputFile <<"Best: " << best << endl;

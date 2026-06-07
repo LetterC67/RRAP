@@ -12,7 +12,7 @@ using namespace std;
 
 mTSPSolver::mTSPSolver(Graph &graph, int salesmen, int cutoff_time, int cutoff_iteration): graph(graph), salesmen(salesmen), cutoff_iteration(cutoff_iteration), cutoff_time(cutoff_time){
     n = graph.n;
-    TAU_MIN = 1 / (double(n * n) / RATIO);
+    TAU_MIN = 1 / (double(n * n) / PARAMETER.SMMAS_PARAMETER.RATIO);
     TAU_MAX = 1.;
     pheromone.resize(n);
     for(auto &p : pheromone)
@@ -26,11 +26,11 @@ pair<int, int> mTSPSolver::select_city(Ant &ant, vector<bool> &visited){
     int current_city = ant.tours[salesman].back();
 
     vector<int> candidate;
-    int bound = min(N_NEAREST, (int)ant.graph -> _closest[current_city].size());
+    int bound = min(PARAMETER.N_NEAREST, (int)ant.graph -> _closest[current_city].size());
     for(int i = 0; i < bound; i++){
         int city = ant.graph -> _closest[current_city][i];
         if(!visited[city]){
-            double prob = pheromone[current_city][city] * 1. / _qpow(graph.distance[current_city][city], BETA);
+            double prob = pheromone[current_city][city] * 1. / _qpow(graph.distance[current_city][city], PARAMETER.SMMAS_PARAMETER.BETA);
             wheel.add(prob);
             candidate.push_back(city);
         }
@@ -73,7 +73,7 @@ vector<Ant> mTSPSolver::build_solutions(){
     vector<Ant> ants;
 
     #pragma omp parallel for
-    for(int ant = 0; ant < (iteration == 1 ? MU : LAMBDA); ant++){
+    for(int ant = 0; ant < (iteration == 1 ? PARAMETER.MU : PARAMETER.SMMAS_PARAMETER.LAMBDA); ant++){
         Ant a;
         if(!population.population.size())
             a = build_solution(Ant(salesmen, &graph.distance, &graph));
@@ -91,7 +91,7 @@ vector<Ant> mTSPSolver::build_solutions(){
 
 void mTSPSolver::update_pheromone(){
     auto p = pheromone;
-    auto RHO = RHO_BASE + graph.n * RHO_COEFF * 0.01;
+    auto RHO = PARAMETER.SMMAS_PARAMETER.RHO_BASE + graph.n * PARAMETER.SMMAS_PARAMETER.RHO_COEFF * 0.01;
 
     for(int i = 0; i < n; i++){
         for(int j = 0; j < n; j++){
@@ -115,7 +115,7 @@ void mTSPSolver::solve(Stat &stat, chrono::time_point<chrono::high_resolution_cl
 
         for(auto &ant : ants){
             if(ant < gbest){
-                if(iteration > RUN_TSP_THRESHOLD) ant.run_tsp();
+                if(iteration > PARAMETER.RUN_TSP_THRESHOLD) ant.run_tsp();
                 gbest = ant;
                 no_improve = 0;
             }
@@ -126,7 +126,7 @@ void mTSPSolver::solve(Stat &stat, chrono::time_point<chrono::high_resolution_cl
             }
         }
 
-        if(iteration == RUN_TSP_THRESHOLD){
+        if(iteration == PARAMETER.RUN_TSP_THRESHOLD){
             gbest.run_tsp();
             population.add(gbest);
         }
@@ -151,6 +151,7 @@ void mTSPSolver::solve(Stat &stat, chrono::time_point<chrono::high_resolution_cl
             });
         }
     }
+    cerr << cutoff_time << '\n';
     gbest.verify(n);
 
     cout << "Result: " << gbest.min_max_cost << endl;
