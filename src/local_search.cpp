@@ -411,18 +411,20 @@ bool Ant::intra_tour_optimization(vector<bool> &not_improved){
             idx++;
             continue;
         }
-        if(two_opt_sweepline(tour, idx) || or_opt(tour, idx)) {
-            retag(idx);
-            not_improved[idx] = false;
-            return true;
+        if(two_opt_sweepline(tour, idx)) improved = true;
+        if(or_opt(tour, idx)) improved = true;
+        if(!improved){
+            not_improved[idx] = true;
         }
-        not_improved[idx] = true;
-        
         idx++;
     }
 
-    return false;
+    for(int i = 0; i < tours.size(); i++)
+        retag(i);
+
+    return improved;
 }
+
 
 void Ant::local_search(){
     vector<int> ord;
