@@ -35,7 +35,8 @@ void Population::kill(){
         }
 
         for(int j = population.size() - 1; j >= 0; j--){
-            v.push_back(ant_distance(population[j],edges));
+            if (j == i) continue;
+            v.push_back(ant_distance(population[j], edges));
         }
 
         sort(v.begin(), v.end(), greater<double>());

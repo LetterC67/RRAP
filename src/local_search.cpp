@@ -39,10 +39,10 @@ bool Ant::relocate(_tour &a, _tour &b, int idx_a, int idx_b){
 
     for(int i = 1; i < a.size() - 1; i++){
         double delta_decrease_a = -(*distance)[a[i - 1]][a[i]] - (*distance)[a[i]][a[i + 1]] + (*distance)[a[i - 1]][a[i + 1]];
-        double delta_decrease_a_2 = -(*distance)[a[i - 1]][a[i]] - (*distance)[a[i]][a[i + 1]] - (*distance)[a[i + 1]][a[i + 2]]  + (*distance)[a[i - 1]][a[i + 2]];
         for(int &u : (*graph).closest[a[i]]){
             if(assigned[u] != idx_b) continue;
             int j = position[u];
+            // assert(j != 0);
             double delta_increase_b = -(*distance)[b[j - 1]][b[j]] + (*distance)[b[j - 1]][a[i]] + (*distance)[a[i]][b[j]];
 
             if(max(a.cost + delta_decrease_a, b.cost + delta_increase_b) + 1e-4 < max(a.cost, b.cost)){
@@ -53,8 +53,9 @@ bool Ant::relocate(_tour &a, _tour &b, int idx_a, int idx_b){
                     type = 0;
                 }
             }
-
+            
             if(i < a.size() - 2){   
+                double delta_decrease_a_2 = -(*distance)[a[i - 1]][a[i]] - (*distance)[a[i]][a[i + 1]] - (*distance)[a[i + 1]][a[i + 2]]  + (*distance)[a[i - 1]][a[i + 2]];
                 double delta_increase_b = -(*distance)[b[j - 1]][b[j]] + (*distance)[b[j - 1]][a[i]] + (*distance)[a[i]][a[i + 1]] + (*distance)[a[i + 1]][b[j]];
                 double _delta_increase_b = -(*distance)[b[j - 1]][b[j]] + (*distance)[b[j - 1]][a[i + 1]] + (*distance)[a[i]][a[i + 1]] + (*distance)[a[i]][b[j]];
                 int t = 1;
@@ -140,11 +141,11 @@ bool Ant::two_opt_inter_tour(_tour &a, _tour &b, int idx_a, int idx_b){
 
     double min_cost = 1e9, _new_cost_a, _new_cost_b;
     int _i = -1, _j = -1, type = -1;
-
     for(int i = 1; i < a.size() - 1; i++){
         for(int &u : (*graph).closest[a[i]]){
             if(assigned[u] != idx_b) continue;
             int j = position[u];
+            // assert(j != 0);
             double new_cost_a = pref_a[i - 1] + suf_b[j] + (*distance)[a[i - 1]][b[j]];
             double new_cost_b = pref_b[j - 1] + suf_a[i] + (*distance)[b[j - 1]][a[i]];
 
@@ -328,12 +329,11 @@ bool Ant::two_opt_sweepline(_tour &tour, int idx){
             current.erase(e.index);
         }
     }
-
     for(int i = 0; i < tour.size() - 1; i++){
         for(auto &u : (*graph).closest[tour[i]]){
             if(assigned[u] != idx) continue;
             int j = position[u];
-            if(u == DEPOT ) continue;
+            if (u == DEPOT) continue;
             int _l, _r;
             if(i < j) _l = i + 1, _r = j;
             else _l = j, _r = i - 1;
