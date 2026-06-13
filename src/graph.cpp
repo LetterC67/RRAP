@@ -245,7 +245,7 @@ struct OneMinimumSpanningTree {
             }
             sort(candidates.begin(), candidates.end());
 
-            for (int j = 0; j < chooseRate; j++){
+            for (int j = 0; j < min(chooseRate, (int) candidates.size()); j++){
                 candidate.push_back(candidates[j].second);
             }
         

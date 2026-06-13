@@ -98,7 +98,7 @@ void Ant::run_tsp(){
 
             unordered_set<int> edges;
 
-            for(int i = 0; i < tour.size(); i++){
+            for(int i = 0; i < tour.size() - 1; i++){
                 edges.insert(tour[i] * (*distance).size() + tour[i + 1]);
             }
 
@@ -124,14 +124,12 @@ void Ant::run_tsp(){
 
 Ant trim(Ant ant){
     int salesmen = ant.tours.size();
-            
-    int del_count = rng() % (int) (PARAMETER.MAXIMUM_RUIN_AND_RECREATE_RATE * (salesmen + 1)) + 1;
+    int del_count = rng() % (int) (ceil(PARAMETER.MAXIMUM_RUIN_AND_RECREATE_RATE * salesmen)) + 1;
     unordered_set<int> del_list;
 
     vector<int> v;
     for(int i = 0; i < salesmen; i++)
-        if(!del_list.count(i))
-            v.push_back(i);
+        v.push_back(i);
 
     shuffle(v.begin(), v.end(), rng);
 
@@ -144,7 +142,11 @@ Ant trim(Ant ant){
             ant.tours[i].cost = 0;
         }else{
             ant.tours[i].tour.pop_back();
-            ant.tours[i].cost = ant.tour_length(ant.tours[i]);
+            // double new_cost = ant.tours[i].cost - (*ant.distance)[ant.tours[i].back()][0];
+            // ant.tours[i].cost = ant.tour_length(ant.tours[i]);
+            // assert(fabs(ant.tours[i].cost - new_cost) < 1e-4);
+            ant.tours[i].cost -= (*ant.distance)[ant.tours[i].back()][0];
+            // assert(fabs(ant.tours[i].cost - ant.tour_length(ant.tours[i])) < 1e-4);
         }
     }
 
