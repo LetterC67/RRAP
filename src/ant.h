@@ -73,15 +73,27 @@ struct Ant{
     void add(int salesman, int vertex);
     void add(_tour &tour, int vertex);
     
-    bool relocate(_tour &a, _tour &b, int idx_a, int idx_b);
+    tuple<double, int, int, int> relocate(_tour &a, _tour &b, int idx_a, int idx_b);
+    void update_relocate(_tour& a, _tour& b,
+                         int idx_a, int idx_b,
+                         int pos_a, int pos_b,
+                         int type);
+    
+    tuple<double, int, int, bool> two_opt_inter_tour(_tour &a, _tour &b, int idx_a, int idx_b);
+    void update_two_opt_inter_tour(_tour& a, _tour& b,
+                                   int idx_a, int idx_b,
+                                   int pos_a, int pos_b,
+                                   bool type);
 
     bool two_opt_sweepline(_tour &tour, int idx);
-    bool two_opt_inter_tour(_tour &a, _tour &b, int idx_a, int idx_b);
     bool or_opt(_tour &tour, int idx);
     void run_tsp();
     void verify(int n);
 
-    bool intra_tour_optimization(vector<bool> &_improved);
+    // bool intra_tour_optimization(vector<bool> &_improved);
+
+    bool two_opt_intra_tour(vector<int> &_improved);
+    bool or_opt_intra_tour(vector<int> &_improved);
 
     void local_search();
     void end_tour();

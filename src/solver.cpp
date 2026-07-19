@@ -91,7 +91,7 @@ vector<Ant> mTSPSolver::build_solutions(){
 
 void mTSPSolver::update_pheromone(){
     auto p = pheromone;
-    auto RHO = PARAMETER.SMMAS_PARAMETER.RHO_BASE + graph.n * PARAMETER.SMMAS_PARAMETER.RHO_COEFF * 0.01;
+    auto RHO = PARAMETER.SMMAS_PARAMETER.RHO_BASE;
 
     for(int i = 0; i < n; i++){
         for(int j = 0; j < n; j++){
