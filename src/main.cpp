@@ -10,6 +10,9 @@
 
 using namespace std;
 
+#include "include/json/json.hpp"
+using json = nlohmann::ordered_json;
+
 int main(int argc, char* argv[]){
     ios_base::sync_with_stdio(0); cin.tie(0);
 
@@ -19,6 +22,12 @@ int main(int argc, char* argv[]){
 		PARAMETER.SEED = rd();
 	}
     init_random_number_generators(PARAMETER.SEED);
+
+    // nlohmann::ordered_json experiment_records;
+    // transform(PARAMETER, experiment_records);
+    // std::ofstream json_out("parameters.json", std::ios::out);
+	// json_out << experiment_records.dump(2);
+	// json_out.close();
 
     if(PARAMETER.SALESMEN == -1){
         cout << "Please specify the number of salesmen." << endl;;
@@ -36,6 +45,8 @@ int main(int argc, char* argv[]){
 
     if(PARAMETER.CUTOFF_ITERATIONS == INT32_MAX && PARAMETER.CUTOFF_TIME == -1){
         PARAMETER.CUTOFF_TIME = 240.0 * graph.n / 100;
+        // PARAMETER.CUTOFF_TIME = 240.0 * graph.n / (100 * 4);
+        // PARAMETER.CUTOFF_TIME = 240.0 * graph.n / (100 * PARAMETER.NUM_THREADS); // for fast testing
     }
 
     for(int i = 0; i < PARAMETER.NUM_RUNS; i++){
