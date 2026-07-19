@@ -14,7 +14,6 @@ pair<double, vector<int>> run(int N, vector<vector<double>> &distances){
 	int maxNumOfTrial;
 
 	TEnvironment* gEnv = new TEnvironment();
-	gEnv->fFileNameTSP=(char*)malloc(100);
 	
 	maxNumOfTrial = 1; // repeated times
 	gEnv->Npop = 100; // number of items

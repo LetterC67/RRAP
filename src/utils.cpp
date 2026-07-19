@@ -1,15 +1,36 @@
 #include <bits/stdc++.h>
+#include <atomic>
+#include <omp.h>
 #include "utils.h"
 #include "ant.h"
 #include "parameters.h"
 
 using namespace std;
 
-mt19937 rng;
-uniform_real_distribution<double> rng_real(0.0, 1.0);
+namespace {
+uint32_t base_seed = 0;
+atomic<uint64_t> seed_generation{0};
+thread_local uint64_t local_seed_generation = 0;
+thread_local mt19937 thread_rng;
+}
 
 void init_random_number_generators(uint32_t seed) {
-    rng = std::mt19937(seed);
+    base_seed = seed;
+    seed_generation.fetch_add(1, memory_order_release);
+    random_number_generator();
+}
+
+mt19937& random_number_generator() {
+    const uint64_t generation = seed_generation.load(memory_order_acquire);
+    if (local_seed_generation != generation) {
+        const uint32_t thread_id = omp_in_parallel()
+            ? static_cast<uint32_t>(omp_get_thread_num())
+            : 0U;
+        seed_seq seeds{base_seed, thread_id, 0x52524150U};
+        thread_rng.seed(seeds);
+        local_seed_generation = generation;
+    }
+    return thread_rng;
 }
 
 double _qpow(double x, int y){
@@ -19,7 +40,7 @@ double _qpow(double x, int y){
 }
 
 int rand_range(int l, int r){
-    return l + rng() % (r - l + 1);
+    return l + random_number_generator()() % (r - l + 1);
 }
 
 void RouletteWheel::add(double probability){
@@ -32,7 +53,8 @@ void RouletteWheel::add(double probability){
 }
 
 int RouletteWheel::spin(){
-    double threshold = rng_real(rng);
+    thread_local uniform_real_distribution<double> rng_real(0.0, 1.0);
+    double threshold = rng_real(random_number_generator());
     double accumulation = 0.;
 
     for(int i = 0; i < probabilities.size(); i++){

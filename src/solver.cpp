@@ -70,20 +70,20 @@ Ant mTSPSolver::build_solution(Ant ant){
 }
 
 vector<Ant> mTSPSolver::build_solutions(){
-    vector<Ant> ants;
+    const int ant_count = iteration == 1
+        ? PARAMETER.MU
+        : PARAMETER.SMMAS_PARAMETER.LAMBDA;
+    vector<Ant> ants(ant_count);
 
-    #pragma omp parallel for
-    for(int ant = 0; ant < (iteration == 1 ? PARAMETER.MU : PARAMETER.SMMAS_PARAMETER.LAMBDA); ant++){
+    #pragma omp parallel for schedule(static)
+    for(int ant = 0; ant < ant_count; ant++){
         Ant a;
         if(!population.population.size())
             a = build_solution(Ant(salesmen, &graph.distance, &graph));
         else{
             a = build_solution(trim(population.get()));
         }
-        #pragma omp critical
-        {
-            ants.push_back(a);
-        }
+        ants[ant] = std::move(a);
     }
 
     return ants;

@@ -203,8 +203,7 @@ pair<double, vector<int>> TEvaluator::returnBestSolution(TIndi& indi){
 }
 
 bool TEvaluator::checkValid(vector<int>& array, double value) {
-	int *check=new int[Ncity];
-	for( int i = 0; i < Ncity; ++i ) check[ i ] = 0;
+	vector<int> check(Ncity, 0);
 	for( int i = 0; i < Ncity; ++i ) ++check[ array[ i ]-1 ];
 	for( int i = 0; i < Ncity; ++i )
 		if( check[ i ] != 1 ) return false;
@@ -214,8 +213,6 @@ bool TEvaluator::checkValid(vector<int>& array, double value) {
 
 	distance += fEdgeDis[ array[ Ncity-1 ]-1 ][ array[ 0 ]-1 ];
 	//printf( "Distance: %f, Value: %f\n", distance, value);
-	delete [] check;
 	if( abs(distance - value) > 1e-3 ) return false;
 	return true;
 }
-

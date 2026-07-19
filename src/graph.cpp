@@ -232,10 +232,11 @@ struct OneMinimumSpanningTree {
             }
 
             for (auto &v : bestTopo) {
-                if (v != node) {
-                    if (marked[v] != node) {
-                        b[v] = max(b[bestPar[v]], new_dis(v, bestPar[v]));
-                    }
+                // The root of the spanning tree has no parent.  Its b value is
+                // either initialized above (when node != root) or is irrelevant
+                // (when node == root), so it must not be passed to new_dis().
+                if (v != node && bestPar[v] != -1 && marked[v] != node) {
+                    b[v] = max(b[bestPar[v]], new_dis(v, bestPar[v]));
                 }
             }
             /////////////////////////////////////////////////

@@ -124,6 +124,7 @@ void Ant::run_tsp(){
 
 Ant trim(Ant ant){
     int salesmen = ant.tours.size();
+    auto &rng = random_number_generator();
     int del_count = rng() % (int) (ceil(PARAMETER.MAXIMUM_RUIN_AND_RECREATE_RATE * salesmen)) + 1;
     unordered_set<int> del_list;
 

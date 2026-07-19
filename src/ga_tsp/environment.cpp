@@ -15,14 +15,18 @@ using namespace std;
 void MakeRandSol(TEvaluator* eval, TIndi& indi);
 void Make2optSol(TEvaluator* eval, TIndi& indi);
 
-TEnvironment::TEnvironment(){
-	fEvaluator = new TEvaluator();
-}
+TEnvironment::TEnvironment():
+    fEvaluator(new TEvaluator()),
+    tCross(nullptr),
+    tKopt(nullptr),
+    fFileNameTSP(nullptr),
+    tCurPop(nullptr) {}
 
 TEnvironment::~TEnvironment(){
 	delete [] tCurPop;
 	delete fEvaluator;
 	delete tCross;
+	delete tKopt;
 }
 
 void TEnvironment::define(){

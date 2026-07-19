@@ -4,10 +4,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-extern mt19937 rng;
-extern uniform_real_distribution<double> rng_real;
-
 void init_random_number_generators(uint32_t seed);
+mt19937& random_number_generator();
 int rand_range(int l, int r);
 double _qpow(double x, int y);
 

@@ -12,7 +12,8 @@
 TSort* tSort = NULL;
 
 void InitSort(){
-	tSort = new TSort();
+	static TSort sort_instance;
+	tSort = &sort_instance;
 }
 
 void swap(int &x, int &y){
@@ -136,4 +137,3 @@ void TSort::sort(vector<int>& Arg, int numOfArg){
 	//selectionSort(Arg, 0, numOfArg-1);
 	quickSort(Arg, 0, numOfArg-1);
 }
-

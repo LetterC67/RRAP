@@ -62,5 +62,5 @@ void Population::add(Ant &ant){
 }
 
 Ant Population::get(){
-    return population[rng() % population.size()];
+    return population[random_number_generator()() % population.size()];
 }
