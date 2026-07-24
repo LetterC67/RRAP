@@ -44,10 +44,12 @@ bool Ant::relocate(_tour &a, _tour &b, int idx_a, int idx_b){
             int j = position[u];
             // assert(j != 0);
             double delta_increase_b = -(*distance)[b[j - 1]][b[j]] + (*distance)[b[j - 1]][a[i]] + (*distance)[a[i]][b[j]];
-
-            if(max(a.cost + delta_decrease_a, b.cost + delta_increase_b) + 1e-4 < max(a.cost, b.cost)){
-                if(min_cost > delta_increase_b + delta_decrease_a){
-                    min_cost = delta_increase_b + delta_decrease_a;
+            
+            double new_cost_a = a.cost + delta_decrease_a;
+            double new_cost_b = b.cost + delta_increase_b;
+            if(max(new_cost_a, new_cost_b) + 1e-4 < max(a.cost, b.cost)){
+                if(min_cost > max(new_cost_a, new_cost_b)){
+                    min_cost = max(new_cost_a, new_cost_b);
                     _i = i;
                     _j = j;
                     type = 0;
@@ -60,14 +62,16 @@ bool Ant::relocate(_tour &a, _tour &b, int idx_a, int idx_b){
                 double _delta_increase_b = -(*distance)[b[j - 1]][b[j]] + (*distance)[b[j - 1]][a[i + 1]] + (*distance)[a[i]][a[i + 1]] + (*distance)[a[i]][b[j]];
                 int t = 1;
 
-                if(delta_increase_b > _delta_increase_b){
+                if(delta_increase_b > _delta_increase_b || fabs(delta_increase_b - _delta_increase_b) < 1E-4){
                     t = 2;
                     delta_increase_b = _delta_increase_b; 
                 }
 
-                if(max(a.cost + delta_decrease_a_2, b.cost + delta_increase_b) + 1e-4 < max(a.cost, b.cost)){
-                    if(min_cost > delta_increase_b + delta_decrease_a_2){
-                        min_cost = delta_increase_b + delta_decrease_a_2;
+                double new_cost_a_2 = a.cost + delta_decrease_a_2;
+                double new_cost_b_2 = b.cost + delta_increase_b;
+                if(max(new_cost_a_2, new_cost_b_2) + 1e-4 < max(a.cost, b.cost)){
+                    if(min_cost > max(new_cost_a_2, new_cost_b_2)){
+                        min_cost = max(new_cost_a_2, new_cost_b_2);
                         _i = i;
                         _j = j;
                         type = t;
@@ -338,7 +342,7 @@ bool Ant::two_opt_sweepline(_tour &tour, int idx){
             if(i < j) _l = i + 1, _r = j;
             else _l = j, _r = i - 1;
             double delta = get_delta(_l - 1, _l, _r, _r + 1, tour, distance);
-            if(delta < -1e-4){
+            if(delta < -1e-4 && _l - 1 != _r){
                 if(delta < min_cost){
                     min_cost = delta;
                     l = _l, r = _r; 
@@ -411,11 +415,13 @@ bool Ant::intra_tour_optimization(vector<bool> &not_improved){
             idx++;
             continue;
         }
-        if(two_opt_sweepline(tour, idx)) improved = true;
-        if(or_opt(tour, idx)) improved = true;
-        if(!improved){
+        bool tour_improved = false;
+        if(two_opt_sweepline(tour, idx)) tour_improved = true;
+        if(or_opt(tour, idx)) tour_improved = true;
+        if(!tour_improved){
             not_improved[idx] = true;
         }
+        improved |= tour_improved;
         idx++;
     }
 
@@ -436,7 +442,6 @@ void Ant::local_search(){
     }
 
     vector<int> _del(del.begin(), del.end());
-
     for(int neighborhood = 0; neighborhood < 3; neighborhood++){
         bool improved = false;
         shuffle(ord.begin(), ord.end(), random_number_generator());
@@ -449,8 +454,8 @@ void Ant::local_search(){
                             improved = true;             
                             fill(not_improved[ord[i]].begin(), not_improved[ord[i]].end(), 0);
                             fill(not_improved[ord[j]].begin(), not_improved[ord[j]].end(), 0);
-                            for (int k = 0; k < tours.size(); k++) {
-                                not_improved[k][ord[i]] = not_improved[k][ord[j]] = false;
+                            for (int k = 0; k < tours.size(); ++k) {
+                                not_improved[k][ord[i]] = not_improved[k][ord[j]] = 0;
                             }
                             single_not_improved[ord[i]] = single_not_improved[ord[j]] = false;
                         }else{
@@ -458,9 +463,6 @@ void Ant::local_search(){
                         }
             
         }else if(neighborhood == 1){
-            bool f = true;
-            while(f) {
-                f = false;
             for(int i = 0; i < tours.size(); i++)
                 for(int j = 0; j < tours.size(); j++)
                     if(j != i && not_improved[ord[i]][ord[j]] < 2)
@@ -468,31 +470,26 @@ void Ant::local_search(){
                             improved = true;
                             fill(not_improved[ord[i]].begin(), not_improved[ord[i]].end(), 0);
                             fill(not_improved[ord[j]].begin(), not_improved[ord[j]].end(), 0);
-                            for (int k = 0; k < tours.size(); k++) {
-                                not_improved[k][ord[i]] = not_improved[k][ord[j]] = false;
+                            for (int k = 0; k < tours.size(); ++k) {
+                                not_improved[k][ord[i]] = not_improved[k][ord[j]] = 0;
                             }
                             single_not_improved[ord[i]] = single_not_improved[ord[j]] = false;
-                            f = true;
                         }else{
                             not_improved[ord[i]][ord[j]] = not_improved[ord[j]][ord[i]] = 2;
                         }
-                    }
         }else{
             improved |= intra_tour_optimization(single_not_improved);
             for(int i = 0; i < single_not_improved.size(); i++){
                 if(!single_not_improved[i]){ 
-                    for (int k = 0; k < tours.size(); k++) {
-                        not_improved[k][i] = not_improved[i][k] = false;
+                    fill(not_improved[i].begin(), not_improved[i].end(), 0);
+                    for (int k = 0; k < tours.size(); ++k) {
+                        not_improved[k][i] = 0;
                     }
                 }
             }
         }
-
-        END:
-
         if(improved) neighborhood = -1;
     }
-
         
     for(auto &tour : tours){
         tour.cost = tour_length(tour);
