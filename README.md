@@ -12,15 +12,15 @@ You can run the executable with `help` flag to display the usage:
 Usage: ./RRAP [options]
   -h, --help        Show this help message
   -b, --beta        The relative influence of the pheromone intensity and the heuristic information
-      --rho-base    The evaporation base rate
-      --rho-coeff   The addition of the evaporation
+      --rho-base    The pheromone evaporation base rate
+      --rho-coeff   The addition coefficient of the pheromone evaporation rate
       --ratio       The addition ratio on tau_min
   -a, --ants        The number of ants
   -p, --population  The size of the population
-  -d, --delta       The diversity penalty on individuals
-      --max-rnr     Maximum rate of the Ruin and Recreate
-      --a-nearness  The a-nearness in 1-tree
-      --n-nearness  
+  -d, --delta       The diversity penalty factor
+      --max-rnr     The maximum ruin rate of the Ruin and Recreate strategy
+      --a-nearness  The maximum number of a-nearest neighbors examined during solution construction
+      --n-nearness  The number of a-nearest neighbors examined during local search
   -i, --instance    Path to the dataset
   -s, --salesmen    The number of salesmen
   -i, --iterations  Cutoff iteration
