@@ -9,11 +9,7 @@
 #include "randomize.h"
 #endif
 
-namespace {
-TRandom random_instance;
-}
-
-TRandom* tRand = &random_instance;
+TRandom* tRand = NULL;
 
 void InitURandom(){
 	int seed;
@@ -22,6 +18,7 @@ void InitURandom(){
 	seed16v[0] = 100;
 	seed16v[1] = 200;
 	seed16v[2] = seed;
+	tRand = new TRandom();
 	srand( seed );
 }
 
@@ -32,6 +29,7 @@ void InitURandom( int dd ){
 	seed16v[0] = 100;
 	seed16v[1] = 200;
 	seed16v[2] = seed;
+	tRand = new TRandom();
 	srand( seed );
 }
 
